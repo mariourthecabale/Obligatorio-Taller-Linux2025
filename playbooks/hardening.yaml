@@ -36,13 +36,47 @@
         line: PasswordAuthentication no
       notify: Reiniciar daemon SSH
 
-    - name: Deshabilito login por contraseña por ssh
+    - name: Validamos que este habilitado el login con clave publica
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         regexp: '^#PubkeyAuthentication'
         line: PubkeyAuthentication yes
         state: present
       notify: Reiniciar daemon SSH
+
+    - name: Instalar fail2ban
+      ansible.builtin.apt:
+        name: fail2ban
+        state: present
+        update_cache: true
+
+    - name: Validacion que fail2ban se encuentre habilitado y corriendo
+      ansible.builtin.systemd_service:
+        name: fail2ban
+        state: started
+        enabled: true
+
+    - name: Configuracion local de fail2ban
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+         [DEFAULT]
+         bantime = 600
+         findtime = 600
+         maxretry = 3
+         backend = auto
+
+         [ssh]
+         enabled = true
+         port = ssh
+         filter = ssh
+         logpath = /var/log/auth.log
+         maxretry = 3
+         bantime = 600
+        owner: root
+        group: root
+        mode: '0640'
+      notify: Reiniciar servicio fail2ban
 
   handlers:
 
@@ -52,4 +86,10 @@
     - name: Reiniciar daemon SSH
       ansible.builtin.systemd_service:
         name: ssh
+        state: restarted
+
+    - name: Reiniciar servicio fail2ban
+      ansible.builtin.systemd_service:
+        name: fail2ban
         state: restarted 
+        enabled: yes
