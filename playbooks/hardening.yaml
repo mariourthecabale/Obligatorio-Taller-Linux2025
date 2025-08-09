@@ -1,2 +1,55 @@
 ---
+- hosts: ubuntu
+  become: yes
 
+  tasks:
+    - name: Mantener sistema actualizado
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: true
+      notify: Reiniciar sistema
+
+    - name: Habilito ufw y niego trafico entrante
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    - name: Habilito trafico ssh
+      community.general.ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+      notify: Reiniciar daemon SSH 
+
+    - name: No permitir login como root
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        insertafter: '^#PermitRootLogin'
+        line: PermitRootLogin no
+      notify: Reiniciar daemon SSH
+
+    - name: Deshabilito login por contraseña por ssh
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#PasswordAuthentication'
+        line: PasswordAuthentication no
+      notify: Reiniciar daemon SSH
+
+    - name: Deshabilito login por contraseña por ssh
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#PubkeyAuthentication'
+        line: PubkeyAuthentication yes
+        state: present
+      notify: Reiniciar daemon SSH
+
+  handlers:
+
+    - name: Reiniciar sistema
+      ansible.builtin.reboot:
+
+    - name: Reiniciar daemon SSH
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: restarted 
