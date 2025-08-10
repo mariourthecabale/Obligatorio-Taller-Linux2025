@@ -29,6 +29,9 @@
         line: PermitRootLogin no
       notify: Reiniciar daemon SSH
 
+    - name: Elimino archivo /etc/ssh/sshd_config.d/50-cloud-init.conf
+      ansible.builtin.command: rm -r /etc/ssh/sshd_config.d/50-cloud-init.conf
+
     - name: Deshabilito login por contraseña por ssh
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config

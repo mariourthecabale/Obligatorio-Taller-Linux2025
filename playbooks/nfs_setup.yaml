@@ -17,7 +17,7 @@
 
   - name: Copiar configuracion a archivo /etc/exports
     ansible.builtin.copy:
-      src: exports
+      src: ../inventories/group_vars/exports
       dest: /etc/exports
       owner: root
       group: root
