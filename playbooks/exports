@@ -1,0 +1,2 @@
+/var/nfs_shared			centos01:(rw, sync, no_subtree_check)
+/var/nfs_shared			ubuntu01:(rw, sync, no_subtree_check)
