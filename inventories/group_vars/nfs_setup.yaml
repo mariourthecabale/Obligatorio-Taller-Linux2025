@@ -1,0 +1,4 @@
+---
+paquete: nfs-utils
+servicio: nfs-server
+servicio_firewall: nfs
