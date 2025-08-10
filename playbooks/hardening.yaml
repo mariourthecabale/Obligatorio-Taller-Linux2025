@@ -66,10 +66,10 @@
          maxretry = 3
          backend = auto
 
-         [ssh]
+         [sshd]
          enabled = true
          port = ssh
-         filter = ssh
+         filter = sshd
          logpath = /var/log/auth.log
          maxretry = 3
          bantime = 600
