@@ -1,0 +1,95 @@
+---
+- hosts: ubuntu
+  become: yes
+
+  tasks:
+    - name: Mantener sistema actualizado
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: true
+      notify: Reiniciar sistema
+
+    - name: Habilito ufw y niego trafico entrante
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    - name: Habilito trafico ssh
+      community.general.ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+      notify: Reiniciar daemon SSH 
+
+    - name: No permitir login como root
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        insertafter: '^#PermitRootLogin'
+        line: PermitRootLogin no
+      notify: Reiniciar daemon SSH
+
+    - name: Deshabilito login por contraseña por ssh
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#PasswordAuthentication'
+        line: PasswordAuthentication no
+      notify: Reiniciar daemon SSH
+
+    - name: Validamos que este habilitado el login con clave publica
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#PubkeyAuthentication'
+        line: PubkeyAuthentication yes
+        state: present
+      notify: Reiniciar daemon SSH
+
+    - name: Instalar fail2ban
+      ansible.builtin.apt:
+        name: fail2ban
+        state: present
+        update_cache: true
+
+    - name: Validacion que fail2ban se encuentre habilitado y corriendo
+      ansible.builtin.systemd_service:
+        name: fail2ban
+        state: started
+        enabled: true
+
+    - name: Configuracion local de fail2ban
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+         [DEFAULT]
+         bantime = 600
+         findtime = 600
+         maxretry = 3
+         backend = auto
+
+         [sshd]
+         enabled = true
+         port = ssh
+         filter = sshd
+         logpath = /var/log/auth.log
+         maxretry = 3
+         bantime = 600
+        owner: root
+        group: root
+        mode: '0640'
+      notify: Reiniciar servicio fail2ban
+
+  handlers:
+
+    - name: Reiniciar sistema
+      ansible.builtin.reboot:
+
+    - name: Reiniciar daemon SSH
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: restarted
+
+    - name: Reiniciar servicio fail2ban
+      ansible.builtin.systemd_service:
+        name: fail2ban
+        state: restarted 
+        enabled: yes
