@@ -7,19 +7,27 @@
 ```yaml
 ssh-copy-id IP_del_cliente
 ```
-3) Traemos el repositorio:  
+3) Instalamos git:  
+```yaml
+sudo dnf install git
+```
+4) Traemos el repositorio:  
 ```yaml
 git clone https://github.com/mariourthecabale/Obligatorio-Taller-Linux2025.git
 ```
-4) Instalamos ansible con el comando: 
+5) Instalamos ansible con el comando: 
 ```yaml
-dnf install ansible-core  
+sudo dnf install ansible-core  
 ```
-5) Instalamos las colecciones:  
+6) Nos ubicamos en la ruta del proyecto: 
+```yaml
+cd Obligatorio-Taller-Linux2025
+```
+7) Instalamos las colecciones:  
 ```yaml
 ansible-galaxy install -r collections/requirements.yaml
 ```
-6) Para la correcta ejecución del Playbook, debemos como paso inicial adaptar el archivo inventory.ini con la configuración de nuestros servidores.  
+8) Para la correcta ejecución del Playbook, debemos como paso inicial adaptar el archivo inventory.ini con la configuración de nuestros servidores.  
 
 Vamos al archivo de .ini:  
 ```yaml
@@ -49,20 +57,24 @@ ansible_user=sysadmin
 centos01
 ```
 Luego procedemos a actualizar los campos **centos01** y **ubuntu01** por el nombre de host que tengan los servidores, además debemos actualizar el campo `ansible_host` por la IP que tengamos configurada.  
+De esta manera tenemos adaptado el archivo **inventory.ini** a las configuraciones de nuestros servidores.
 
-7) Guardamos los cambios
-8) Configuramos archivo exports:
+9) Guardamos los cambios
+
+10) Configuramos archivo exports:
 ```yaml  
-vim inventories/group_vars
-
+vim inventories/group_vars/exports
+```
+Veremos la siguiente configuración:
+```yaml
 /var/nfs_shared     IP_del_cliente (rw, sync, no_subtree_check)
 /var/nfs_shared     IP_del_cliente2 (rw, sync, no_subtree_check)
 ```
-De esta manera tenemos adaptado el archivo **inventory.ini** a las configuraciones de nuestros servidores.
+Procedemos a colocar las Ip´s correspondientes a nuestro proyecto, para los clientes a los cuales queremos compartir el contenido.
   
-9) Guardamos los cambios  
+11) Guardamos los cambios  
 
-10) Para ejecutar las playbook generadas lo haremos con las siguientes sintaxis:
+12) Para ejecutar las playbook generadas lo haremos con las siguientes sintaxis:
   
 Playbook **nfs_setup.yaml:**  
 ```yaml
