@@ -5,7 +5,7 @@
 ```
 2) Copiamos llave pública a clientes con el comando:  
 ```yaml
-ssh-copy IP_del_cliente
+ssh-copy-id IP_del_cliente
 ```
 3) Traemos el repositorio:  
 ```yaml
